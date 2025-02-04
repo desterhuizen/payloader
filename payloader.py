@@ -14,7 +14,8 @@ def main():
     parser.add_argument('--architecture', '-a', choices=['x64', 'x86', 'arm64', 'arm'],
                         help='Target architecture')
     parser.add_argument('--outputDir', '-o', required=True, help='Target location')
-    parser.add_argument('--format', '-f', choices=['exe', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba'],
+    parser.add_argument('--format', '-f',
+                        choices=['exe', 'dll', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba'],
                         required=True, help='Output format')
     parser.add_argument('--key', '-k', help='Key for encryption')
     parser.add_argument('--encrypt', '-e', choices=['aes', 'xor', 'rc4', 'none'], help='Encryption type',

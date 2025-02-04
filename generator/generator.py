@@ -40,9 +40,11 @@ class Generator:
         Substitute the values in the template
         :return: str - Source code with substituted values
         """
+        self.source = self.template_content
         for key, value in self.values.items():
             if value is not None and f'[[{key}]]' in self.template_content:
-                self.source = self.template_content.replace(f'[[{key}]]', value)
+                self.source = self.source.replace(f'[[{key}]]', value)
+
         return self.source
 
     def compile_source(self) -> None:
@@ -83,6 +85,7 @@ class Generator:
             file.write(self.clean_output())
 
         compiler = compiler_switch[template_type]
+        compile_command = [compiler, source_file]
 
         if self.platform == 'win':
             output_file = os.path.join(self.target_location, 'output')
@@ -90,15 +93,15 @@ class Generator:
                 output_file += '.exe'
             else:
                 output_file += '.dll'
+                compile_command.append("-target:library")
         else:
             output_file = os.path.join(self.target_location, 'output')
             if self.output_format == 'elf-so':
                 output_file += '.so'
             elif self.output_format == 'elf':
                 output_file += '.elf'
-        output_argument = output_file_argument[template_type] + output_file
+        compile_command.append(output_file_argument[template_type] + output_file)
 
-        compile_command = [compiler, source_file, compiler_options[template_type], output_argument]
         try:
             subprocess.run(compile_command, check=True)
         except subprocess.CalledProcessError as e:
@@ -137,6 +140,7 @@ class Generator:
         try:
             self.template_content = self.read_template()
             self.substitute_values()
+            self.add_encryption()
 
             if not os.path.exists(self.target_location):
                 os.makedirs(self.target_location)
@@ -165,3 +169,17 @@ class Generator:
         print("Available templates:")
         for template, description in templates.items():
             print(f"{template} - {description}")
+
+    def add_encryption(self):
+        encrypt_data = ""
+        if self.encrypt != 'none':
+            source_type = self.template.split('.')[-1]
+            encrypt_path = os.path.join('./partial', f'{self.encrypt}.{source_type}')
+            encrypt_data = ""
+            if os.path.exists(encrypt_path):
+                if not os.path.exists(encrypt_path):
+                    raise FileNotFoundError(
+                        f"Partial for encryptor '{self.encrypt}' not found in './partials' directory.")
+                with open(encrypt_path, 'r') as file:
+                    encrypt_data = file.read()
+        self.source = self.source.replace(f'[[ENCRYPT]]', encrypt_data)
