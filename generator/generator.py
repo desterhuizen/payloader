@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+root_path=os.path.dirname(os.path.abspath(__file__))+'/../'
 
 class Generator:
     def __init__(self, template: str, platform: str, architecture: str, target_location: str, output_format: str,
@@ -29,7 +29,7 @@ class Generator:
         Read the template file
         :return: str - Template content
         """
-        template_path = os.path.join('./templates', self.template)
+        template_path = os.path.join(root_path+'templates', self.template)
         if not os.path.exists(template_path):
             raise FileNotFoundError(f"Template '{self.template}' not found in './templates' directory.")
         with open(template_path, 'r') as file:
@@ -158,7 +158,7 @@ class Generator:
         List the available templates
         :return:  list - List of available templates
         """
-        templates_dir = './templates'
+        templates_dir = root_path+'templates'
 
         if not os.path.exists(templates_dir):
             raise FileNotFoundError(f"Templates directory '{templates_dir}' not found.")
