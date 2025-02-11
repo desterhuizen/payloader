@@ -23,3 +23,17 @@ or
 ```bash
 payloader example.ps1 -f ps1 -o test -p "iwr http://test.com/test -o test"
 ```
+
+
+# Install
+
+```bash
+git clone https://github.com/desterhuizen/payloader.git
+cd payloader
+virtualenv .venv
+ln -s $(realpath ./payloader.py) ~/.local/bin/payloader
+git submodule add <YOUR PAYLOADS REPO> templates
+git submodule init
+```
+
+
