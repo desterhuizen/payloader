@@ -3,6 +3,8 @@
 import argparse
 import sys
 
+import argcomplete
+
 from generator import Generator
 
 
@@ -25,6 +27,8 @@ def main():
     parser.add_argument('--list', '-l', action='store_true', help='List available templates')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
+
+    argcomplete.autocomplete(parser)
 
     if '--list' in sys.argv or '-l' in sys.argv:
         Generator.list_templates()

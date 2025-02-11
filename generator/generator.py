@@ -164,11 +164,11 @@ class Generator:
             raise FileNotFoundError(f"Templates directory '{templates_dir}' not found.")
         templates = {}
         for template in os.listdir(templates_dir):
-            if os.path.isfile(os.path.join(templates_dir, template)):
-                templates[template] = open(os.path.join(templates_dir, template)).readline().strip()
+            if os.path.isfile(os.path.join(templates_dir, template)) and not template.startswith('.') and not template.endswith('.md') and template != 'LICENSE':
+                templates[template] = open(os.path.join(templates_dir, template)).readline().strip()[3:]
         print("Available templates:")
         for template, description in templates.items():
-            print(f"{template} - {description}")
+            print(f"{template} \t- {description}")
 
     def add_encryption(self):
         encrypt_data = ""
