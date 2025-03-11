@@ -145,7 +145,7 @@ class Generator:
             if not os.path.exists(self.target_location):
                 os.makedirs(self.target_location)
 
-            if self.output_format in ['sh', 'bat', 'ps1', 'py', 'js', 'vba']:
+            if self.output_format in ['sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta']:
                 self.generate_script()
             else:
                 self.compile_source()
@@ -174,7 +174,7 @@ class Generator:
         encrypt_data = ""
         if self.encrypt != 'none':
             source_type = self.template.split('.')[-1]
-            encrypt_path = os.path.join('./partial', f'{self.encrypt}.{source_type}')
+            encrypt_path = os.path.join(root_path+'partial', f'{self.encrypt}.{source_type}')
             encrypt_data = ""
             if os.path.exists(encrypt_path):
                 if not os.path.exists(encrypt_path):
