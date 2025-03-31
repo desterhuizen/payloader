@@ -72,11 +72,11 @@ class Generator:
         }
 
         output_file_argument = {
-            'c': '-o ',
-            'cpp': '-o ',
+            'c': '-o',
+            'cpp': '-o',
             'cs': '-out:',
             'java': '',
-            'go': '-o '
+            'go': '-o'
         }
 
         source_file = os.path.join(self.target_location, f'source.{template_type}')
@@ -100,7 +100,12 @@ class Generator:
                 output_file += '.so'
             elif self.output_format == 'elf':
                 output_file += '.elf'
-        compile_command.append(output_file_argument[template_type] + output_file)
+        
+        if template_type == 'cs':
+            compile_command.append(output_file_argument[template_type]+output_file)
+        else:
+            compile_command.append(output_file_argument[template_type])
+            compile_command.append(output_file)
 
         try:
             subprocess.run(compile_command, check=True)

