@@ -7,8 +7,15 @@ import os
 def encrypt(encryption, data, key=42):
     enc=[]
     if encryption == 'xor':
-        for b in data:
-            enc.append(b ^ key)
+        if isinstance(key, str):
+            count = 0
+            for b in data:
+                enc_token = key[count % len(key)]
+                enc.append(b ^ ord(enc_token))
+                count += 1
+        else:
+            for b in data:
+                enc.append(b ^ key)
     elif encryption in ['flop_flop','ff']:
         for b in data:
             key *= -1
@@ -60,7 +67,7 @@ def format_output(encrypted_data, language):
             # Check if adding the next value would exceed line length
             if len(current_line + f"{val},") > 80 and i < len(int_values) - 1:
                 lines.append(current_line.rstrip(",") + " _")
-                current_line = "    "
+                current_line = "        "
             
             if i < len(int_values) - 1:
                 current_line += f"{val},"
@@ -76,11 +83,17 @@ def format_output(encrypted_data, language):
     else:
         return f"Unsupported language: {language}. Using hex format instead:\n{hex_output}"
 
+def parse_int_or_str(value):
+    """Parse the value as int if possible, otherwise keep as string."""
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
 def main():
-    # Set up argument parser
     parser = argparse.ArgumentParser(description='Encrypt binary data and output in specified format.')
-    parser.add_argument('--key', type=int, default=42, help='Encryption key.')
-    parser.add_argument('--encryption', type=str, default='xor', help='Encryption algorithm.', choices=['xor', 'flip_flop', 'ff', 'caesar'])
+    parser.add_argument('--key', type=str, default='42', help='Encryption key.')
+    parser.add_argument('--encryption', type=parse_int_or_str, default='xor', help='Encryption algorithm.', choices=['xor', 'flip_flop', 'ff', 'caesar'])
     parser.add_argument('--lang', type=str, default='hex', 
                         choices=['hex', 'python', 'c', 'csharp', 'c#', 'java', 'vba', 'js', 'javascript'],
                         help='Output language format')
@@ -108,11 +121,12 @@ def main():
     # Format according to the specified language
     formatted_output = format_output(encrypted_data, args.lang.lower())
     
+    print (f"[+] Encrypted using {args.encryption} and {args.key} as the key", file=sys.stderr)
     # Output to file or stdout
     if args.output:
         with open(args.output, 'w') as f:
             f.write(formatted_output)
-        print(f"Output written to {args.output}")
+        print(f"[+] Output written to {args.output}")
     else:
         print(formatted_output)
 

