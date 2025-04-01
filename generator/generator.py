@@ -1,7 +1,13 @@
+import sys
 import os
 import subprocess
 import re
 root_path=os.path.dirname(os.path.abspath(__file__))+'/../'
+
+RED = '\033[91m'
+GREEN = '\033[92m'
+RESET = '\033[0m'
+
 
 class Generator:
     def __init__(self, template: str, platform: str, architecture: str, target_file: str, output_format: str,
@@ -105,9 +111,11 @@ class Generator:
             try:
                 compile_command.append(source_file)
                 subprocess.run(compile_command, check=True)
+                print (f"{GREEN}[+] Compiled payload to {self.target_file}.{RESET}") 
             except subprocess.CalledProcessError as e:
-                print(f"Compilation failed: {e}")
+                print(f"{RED}[-] Compilation failed: {e} {RESET}")
         else:
+            print (f"{GREEN}[+] Compiled payload to {self.target_file}.{RESET}", file=sys.stderr) 
             print(self.clean_output())
 
     def generate_script(self) -> None:
@@ -115,8 +123,10 @@ class Generator:
         Generate the script file with the source code
         """
         if self.target_file is None:
+            print (f"{GREEN}[+] Your payload.{RESET}", file=sys.stderr) 
             print (self.clean_output())
         else:
+            print (f"{GREEN}[+] Wrote payload to {self.target_file}.{RESET}", file=sys.stderr) 
             with open(self.target_file, 'w') as file:
                 file.write(self.clean_output())
 
@@ -155,7 +165,7 @@ class Generator:
                 self.directory = os.getcwd()
 
             if self.target_file and not os.path.exists(self.directory) and not os.path.isdir(self.directory):
-                print(f"{RED}[-] The output directory does not exist")
+                print(f"{RED}[-] The output directory does not exist{RESET}")
                 sys.exit()
 
             if self.output_format in ['sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta']:
@@ -163,7 +173,7 @@ class Generator:
             else:
                 self.compile_source()
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"{RED}[]Error: {e}{RESET}")
 
     @staticmethod
     def list_templates() -> None:
