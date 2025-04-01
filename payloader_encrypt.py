@@ -4,6 +4,10 @@ import binascii
 import argparse
 import os
 
+RED = '\033[91m'
+GREEN = '\033[92m'
+RESET = '\033[0m'
+
 def encrypt(encryption, data, key=42):
     enc=[]
     if encryption == 'xor':
@@ -17,10 +21,16 @@ def encrypt(encryption, data, key=42):
             for b in data:
                 enc.append(b ^ key)
     elif encryption in ['flop_flop','ff']:
+        if isinstance(key, str):
+            print (f"{RED}[-] Key must be a number for flip flop encryption.{RESET}", file=sys.stderr) 
+            sys.exit(1)
         for b in data:
             key *= -1
-            enc.append((b + key) & 0xff)
+            enc.append((b + int(key)) & 0xff)
     elif encryption in ['caesar']:
+        if isinstance(key, str):
+            print (f"{RED}[-] Key must be a number for caesar encryption.{RESET}", file=sys.stderr) 
+            sys.exit(1)
         for b in data:
             enc.append((b + key) & 0xff)
     else:
@@ -52,8 +62,13 @@ def format_output(encrypted_data, language):
     
     elif language == "java":
         chunks = [hex_output[i:i+2] for i in range(0, len(hex_output), 2)]
-        byte_string = ', '.join(f"(byte)0x{chunk}" for chunk in chunks)
+        byte_string = ', '.join(f"0x{chunk}" for chunk in chunks)
         return f"byte[] buf = new byte[] {{\n  {byte_string}\n}};\n"
+
+    elif language == "powershell" or language == "ps1":
+        chunks = [hex_output[i:i+2] for i in range(0, len(hex_output), 2)]
+        byte_string = ','.join(f"0x{chunk}" for chunk in chunks)
+        return f"[Byte[]] $buf = {byte_string}\n"
     
     elif language == "vba":
         # Convert bytes to decimal integers for VBA
@@ -92,10 +107,10 @@ def parse_int_or_str(value):
 
 def main():
     parser = argparse.ArgumentParser(description='Encrypt binary data and output in specified format.')
-    parser.add_argument('--key', type=str, default='42', help='Encryption key.')
-    parser.add_argument('--encryption', type=parse_int_or_str, default='xor', help='Encryption algorithm.', choices=['xor', 'flip_flop', 'ff', 'caesar'])
+    parser.add_argument('--key', type=parse_int_or_str, default=42, help='Encryption key.')
+    parser.add_argument('--encryption', type=str, default='xor', help='Encryption algorithm.', choices=['xor', 'flip_flop', 'ff', 'caesar'])
     parser.add_argument('--lang', type=str, default='hex', 
-                        choices=['hex', 'python', 'c', 'csharp', 'c#', 'java', 'vba', 'js', 'javascript'],
+                        choices=['hex', 'python', 'c', 'csharp', 'c#', 'java', 'vba', 'js', 'javascript','ps1', 'powershell'],
                         help='Output language format')
     parser.add_argument('--input', type=str, help='Input file path (if not specified, reads from stdin)')
     parser.add_argument('--output', type=str, help='Output file path (if not specified, writes to stdout)')
@@ -111,7 +126,7 @@ def main():
         if not os.isatty(sys.stdin.fileno()):
             binary_data = sys.stdin.buffer.read()
         else:
-            print("Error: No input provided. Either pipe data to the script or specify an input file.")
+            print(f"{RED}[-] Error: No input provided. Either pipe data to the script or specify an input file.{RESET}")
             parser.print_help()
             sys.exit(1)
     
@@ -121,12 +136,12 @@ def main():
     # Format according to the specified language
     formatted_output = format_output(encrypted_data, args.lang.lower())
     
-    print (f"[+] Encrypted using {args.encryption} and {args.key} as the key", file=sys.stderr)
+    print (f"{GREEN}[+] Encrypted using {args.encryption} and {args.key} as the key.{RESET}", file=sys.stderr)
     # Output to file or stdout
     if args.output:
         with open(args.output, 'w') as f:
             f.write(formatted_output)
-        print(f"[+] Output written to {args.output}")
+        print(f"{GREEN}[+] Output written to {args.output}{RESET}")
     else:
         print(formatted_output)
 

@@ -4,7 +4,7 @@ import re
 root_path=os.path.dirname(os.path.abspath(__file__))+'/../'
 
 class Generator:
-    def __init__(self, template: str, platform: str, architecture: str, target_location: str, output_format: str,
+    def __init__(self, template: str, platform: str, architecture: str, target_file: str, output_format: str,
                  key: str, payload: str, values: dict,
                  encrypt: str,
                  verbose: bool) -> None:
@@ -17,13 +17,14 @@ class Generator:
         self.template = template
         self.platform = platform
         self.architecture = architecture
-        self.target_location = target_location
+        self.target_file = target_file
         self.output_format = output_format
         self.key = key
         self.payload = payload
         self.values = values
         self.source = None
         self.template_content = None
+        self.directory = ''
 
     def read_template(self) -> str:
         """
@@ -85,46 +86,39 @@ class Generator:
             'go': '-o'
         }
 
-        source_file = os.path.join(self.target_location, f'source.{template_type}')
+        if self.target_file:
 
-        with open(source_file, 'w') as file:
-            file.write(self.clean_output())
+            compiler = compiler_switch[template_type]
+            compile_command = [compiler]
 
-        compiler = compiler_switch[template_type]
-        compile_command = [compiler, source_file]
+            source_file = os.path.join(self.directory, f'source.{template_type}')
 
-        if self.platform == 'win':
-            output_file = os.path.join(self.target_location, 'output')
-            if self.output_format == 'exe':
-                output_file += '.exe'
+            with open(source_file, 'w') as file:
+                file.write(self.clean_output())
+
+            if template_type == 'cs':
+                compile_command.append(output_file_argument[template_type]+self.target_file)
             else:
-                output_file += '.dll'
-                compile_command.append("-target:library")
-        else:
-            output_file = os.path.join(self.target_location, 'output')
-            if self.output_format == 'elf-so':
-                output_file += '.so'
-            elif self.output_format == 'elf':
-                output_file += '.elf'
-        
-        if template_type == 'cs':
-            compile_command.append(output_file_argument[template_type]+output_file)
-        else:
-            compile_command.append(output_file_argument[template_type])
-            compile_command.append(output_file)
+                compile_command.append(output_file_argument[template_type])
+                compile_command.append(self.target_file)
 
-        try:
-            subprocess.run(compile_command, check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Compilation failed: {e}")
+            try:
+                compile_command.append(source_file)
+                subprocess.run(compile_command, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Compilation failed: {e}")
+        else:
+            print(self.clean_output())
 
     def generate_script(self) -> None:
         """
         Generate the script file with the source code
         """
-        script_file = os.path.join(self.target_location, f'output.{self.output_format}', )
-        with open(script_file, 'w') as file:
-            file.write(self.clean_output())
+        if self.target_file is None:
+            print (self.clean_output())
+        else:
+            with open(self.target_file, 'w') as file:
+                file.write(self.clean_output())
 
     def clean_output(self) -> str:
         """
@@ -153,8 +147,16 @@ class Generator:
             self.substitute_values()
             self.add_encryption()
 
-            if not os.path.exists(self.target_location):
-                os.makedirs(self.target_location)
+            
+            if self.target_file:
+                self.directory = os.path.dirname(self.target_file)
+            
+            if self.target_file and self.directory == '':
+                self.directory = os.getcwd()
+
+            if self.target_file and not os.path.exists(self.directory) and not os.path.isdir(self.directory):
+                print(f"{RED}[-] The output directory does not exist")
+                sys.exit()
 
             if self.output_format in ['sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta']:
                 self.generate_script()

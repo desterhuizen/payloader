@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--platform', '-p', choices=['win', 'nix'], help='Target platform')
     parser.add_argument('--architecture', '-a', choices=['x64', 'x86', 'arm64', 'arm'],
                         help='Target architecture')
-    parser.add_argument('--outputDir', '-o', default=os.getcwd(), help='Target location')
+    parser.add_argument('--output', '-o', default=None, help='Target output file')
     parser.add_argument('--format', '-f',
                         choices=['exe', 'dll', 'elf', 'elf-so', 'sh', 'bat', 'ps1', 'py', 'js', 'vba', 'hta', 'cs'],
                         required=True, help='Output format')
@@ -48,7 +48,7 @@ def main():
         key = args.key
         values['KEY'] = args.key
 
-    Generator(args.template, args.platform, args.architecture, args.outputDir, args.format, key, args.payload,
+    Generator(args.template, args.platform, args.architecture, args.output, args.format, key, args.payload,
               values, args.encrypt, args.verbose).generate_payload()
 
 
