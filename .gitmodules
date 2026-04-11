@@ -1,3 +1,6 @@
 [submodule "templates"]
 	path = templates
 	url = git@github.com:desterhuizen/payloader-templates.git
+[submodule "custom_payloads"]
+	path = custom_payloads
+	url = git@github.com:desterhuizen/custom_payloads.git
